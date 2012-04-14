@@ -25,7 +25,7 @@ object Default {
       scalaVersion       <<= (crossScalaVersions) { versions => versions.head },
       scalacOptions      :=  Seq("-unchecked", "-deprecation", "-encoding", "UTF-8", "-optimise", "-Yrepl-sync"),
       unmanagedSourceDirectories in Compile <<= (scalaSource in Compile)(_ :: Nil),
-      unmanagedSourceDirectories in Test    :=  Nil
+      unmanagedSourceDirectories in Test    <<= (scalaSource in Test)(_ :: Nil)
   )
 }
 
