@@ -78,7 +78,7 @@ class BaseDriver private(fpOpt: Option[FirefoxProfile], settings: BaseDriverSett
     * @param locatorList a sequence of elements to search for
     */
   def elementListExists(locatorList: Seq[Locator]): Boolean =
-    locatorList contains elementExists _
+    locatorList map elementExists _ contains true
 
 
 
