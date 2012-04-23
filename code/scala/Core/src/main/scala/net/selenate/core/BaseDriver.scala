@@ -40,45 +40,45 @@ class BaseDriver private(fpOpt: Option[FirefoxProfile], settings: BaseDriverSett
     this(Some(fp), settings)
 
 
-  /** Waits for the specified element to appear.
+  /** Waits for the specified locator to appear.
     *
-    * @param locator element to wait for
-    * @throws SelenateException if the element is never found
+    * @param locator locator to wait for
+    * @throws SelenateException if the locator is never found
     */
-  def waitForElement(locator: Locator) {
+  def waitForLocator(locator: Locator) {
     waitOrFail(locator.name) {
-      elementExists(locator)
+      locatorExists(locator)
     }
   }
 
-  /** Waits for any element from the specified list.
+  /** Waits for any locator from the specified list.
     *
-    * @param locatorList a sequence of elements to wait for
-    * @throws SelenateException if none of the elements are ever found
+    * @param locatorList a sequence of locators to wait for
+    * @throws SelenateException if none of the locators are ever found
     */
-  def waitForElementList(locatorList: Seq[Locator]) {
+  def waitForLocatorList(locatorList: Seq[Locator]) {
     val politeName = locatorList.map(_.name) mkString " or "
     waitOrFail(politeName) {
-      elementListExists(locatorList)
+      locatorListExists(locatorList)
     }
   }
 
 
-  /** Checks weather the specified element currently exists.
+  /** Checks weather the specified locator currently exists.
     *
-    * @param locator element to search for
+    * @param locator locator to search for
     */
-  def elementExists(locator: Locator): Boolean = {
+  def locatorExists(locator: Locator): Boolean = {
     val elementList = locator.componentList.flatMap(findElements(_))
     !elementList.isEmpty
   }
 
-  /** Checks weather any element from the specified list currently exists.
+  /** Checks weather any locator from the specified list currently exists.
     *
-    * @param locatorList a sequence of elements to search for
+    * @param locatorList a sequence of locators to search for
     */
-  def elementListExists(locatorList: Seq[Locator]): Boolean =
-    locatorList map elementExists _ contains true
+  def locatorListExists(locatorList: Seq[Locator]): Boolean =
+    locatorList map locatorExists _ contains true
 
 
 
