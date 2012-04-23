@@ -4,7 +4,7 @@ import Keys._
 
 
 object Dependencies {
-  val seleniumVersion = "2.20.0"
+  val seleniumVersion = "2.21.0"
   val selenium = Seq(
     "org.seleniumhq.selenium" % "selenium-firefox-driver" % seleniumVersion,
     "org.seleniumhq.selenium" % "selenium-server"         % seleniumVersion

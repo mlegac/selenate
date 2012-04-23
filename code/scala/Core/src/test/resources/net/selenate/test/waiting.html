@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Waiting for elements test page.</title>
+    <script type="text/javascript">
+      function spawnElement(elementId) {
+        var textNode = document.createTextNode(elementId);
+        var e = document.createElement('div');
+        e.setAttribute('id', elementId);
+        e.appendChild(textNode);
+        document.getElementById('container').appendChild(e);
+      }
+
+      function spawnElementWithDelay(elementId, delayMillis) {
+        window.setTimeout(spawnElement, delayMillis, elementId)
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="container"></div>
+  </body>
+</html>
