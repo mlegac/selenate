@@ -54,7 +54,7 @@ class BaseDriverTest extends FeatureSpec
       given("an element that does exist")
       val locator = existingLocator
       when("its existence is verified")
-      val result = exec(d.elementExists(locator))
+      val result = exec(d.locatorExists(locator))
       then("it must be found")
       result.right.value.r must equal (true)
 
@@ -67,7 +67,7 @@ class BaseDriverTest extends FeatureSpec
       given("an element that does not exist")
       val locator = missingLocator1
       when("its existence is verified")
-      val result = exec(d.elementExists(locator))
+      val result = exec(d.locatorExists(locator))
       then("it must not be found")
       result.right.value.r must equal (false)
 
@@ -80,7 +80,7 @@ class BaseDriverTest extends FeatureSpec
       given("a list of two elements where one does exist and the other does not")
       val locatorList = List(existingLocator, missingLocator1)
       when("their existence is verified")
-      val result = exec(d.elementListExists(locatorList))
+      val result = exec(d.locatorListExists(locatorList))
       then("they must be found")
       result.right.value.r must equal (true)
 
@@ -93,7 +93,7 @@ class BaseDriverTest extends FeatureSpec
       given("a list of two elements where neither exists")
       val locatorList = List(missingLocator1, missingLocator2)
       when("their existence is verified")
-      val result = exec(d.elementListExists(locatorList))
+      val result = exec(d.locatorListExists(locatorList))
       then("they must not be found")
       result.right.value.r must equal (false)
 
@@ -119,7 +119,7 @@ class BaseDriverTest extends FeatureSpec
       and("a timer which will spawn the element after the delay")
       d.executeScript("spawnElementWithDelay('%s', %d);".format("d1", delay))
       when("it is being waited for")
-      val result = exec(d.waitForElement(locator))
+      val result = exec(d.waitForLocator(locator))
       then("it must be found")
       result.right.value.r must equal (())
       and("the waiting time must be close to the delay")
