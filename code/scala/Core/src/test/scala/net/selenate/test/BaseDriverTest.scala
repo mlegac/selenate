@@ -7,8 +7,8 @@ import org.openqa.selenium.By
 import org.scalatest._
 import matchers._
 
-object BaseDriverTest extends MustMatchers {
-  val TestSettings = BaseDriverSettings(5000, 100, 0.5)
+object SelenateDriverTest extends MustMatchers {
+  val TestSettings = SelenateDriverSettings(5000, 100, 0.5)
 
   case class TimedResult[T](r: T, t: Long)
   def exec[T](f: => T): Either[Exception, TimedResult[T]] =
@@ -24,23 +24,28 @@ object BaseDriverTest extends MustMatchers {
         Left(e)
     }
 
-  def beCloseTo(l: Long) = be >= (l-100) and be <= (l+100)
 
-  def init(name: String): BaseDriver = {
-    val d = new BaseDriver(TestSettings)
-    val pageFilename = classOf[BaseDriverTest].getResource(name).getFile
+  def init(name: String): SelenateDriver = {
+    val d = new SelenateDriver(TestSettings)
+    val pageFilename = classOf[SelenateDriverTest].getResource(name).getFile
     d.get("file://"+ pageFilename)
     d
   }
+
+
+  def ≈(i: Interval) = be >= (i.mean-i.precision) and be <= (i.mean+i.precision)
+  implicit def impaleInterval(l: Long) = new IntervalImpaler(l)
+  class IntervalImpaler(l: Long) { def ±(precision: Long) = Interval(l, precision) }
+  case class Interval(mean: Long, precision: Long)
 }
 
 
 
-class BaseDriverTest extends FeatureSpec
+class SelenateDriverTest extends FeatureSpec
     with GivenWhenThen
     with MustMatchers
     with EitherValues {
-  import BaseDriverTest._
+  import SelenateDriverTest._
 
   feature("Locator existence verification") {
     info("Initializig locators...")
@@ -104,7 +109,6 @@ class BaseDriverTest extends FeatureSpec
   }
 
 
-
   feature("Waiting for a locator to appear") {
     info("Initializig locators...")
     val existingLocator = Locator("d1", By.id("d1"))
@@ -117,7 +121,7 @@ class BaseDriverTest extends FeatureSpec
       given("a locator which will appear")
       val locator = existingLocator
       and("a delay")
-      val delay = 500
+      val delay = 500l
       and("a timer which will spawn the element after the delay")
       d.executeScript("spawnElementWithDelay('%s', %d);".format("d1", delay))
       when("it is being waited for")
@@ -125,7 +129,7 @@ class BaseDriverTest extends FeatureSpec
       then("it must be found")
       result.right.value.r must equal (())
       and("the waiting time must be close to the delay")
-      result.right.value.t must beCloseTo(delay)
+      result.right.value.t must ≈ (delay±100)
 
       d.close
     }
