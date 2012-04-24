@@ -4,7 +4,8 @@ package core
 import org.openqa.selenium.firefox.{ FirefoxDriver, FirefoxProfile }
 import scala.collection.JavaConversions._
 import org.openqa.selenium.OutputType
-
+import org.openqa.selenium.By
+import org.openqa.selenium.WebElement
 
 
 /** Storage class for `BaseDriver` settings.
@@ -12,13 +13,16 @@ import org.openqa.selenium.OutputType
   * @param timeout used when waiting for web page elements to load (maximum waiting time)
   * @param resolution used when waiting for web page elements to load (pause between successive checks)
   */
-case class BaseDriverSettings(timeout: Long, resolution: Long)
+case class BaseDriverSettings(
+    timeout: Long,
+    resolution: Long,
+    locatorMissingTreshold: Double)
 
 
 /** Provides defaults, and utility methods for `BaseDriver`. */
 object BaseDriver {
   /** Default settings for `BaseDriver` (timeout of 30 s and resolution of 250 ms. */
-  val DefaultSettings = BaseDriverSettings(30000L, 250L)
+  val DefaultSettings = BaseDriverSettings(30000L, 250L, 0.5)
 
   private def InitFP(fpOpt: Option[FirefoxProfile]): FirefoxProfile =
     fpOpt.getOrElse(new FirefoxProfile())
@@ -69,8 +73,11 @@ class BaseDriver private(fpOpt: Option[FirefoxProfile], settings: BaseDriverSett
     * @param locator locator to search for
     */
   def locatorExists(locator: Locator): Boolean = {
-    val elementList = locator.componentList.flatMap(findElements(_))
-    !elementList.isEmpty
+    val foundElementList = locator.componentSet filter elementExists
+    val missingElementList = locator.componentSet &~ foundElementList
+
+    val missingRatio = missingElementList.size.toDouble / locator.componentSet.size.toDouble
+    missingRatio < settings.locatorMissingTreshold
   }
 
   /** Checks weather any locator from the specified list currently exists.
@@ -98,6 +105,15 @@ class BaseDriver private(fpOpt: Option[FirefoxProfile], settings: BaseDriverSett
 
 
 
+  protected def elementExists(by: By): Boolean =
+    tryFindElement(by).isDefined
+
+  protected def tryFindElement(by: By): Option[WebElement] =
+    try {
+      Some(findElement(by))
+    } catch {
+      case e: Exception => None
+    }
 
   protected def waitFor(predicate: => Boolean) =
     util.waitFor(settings.timeout, settings.resolution)

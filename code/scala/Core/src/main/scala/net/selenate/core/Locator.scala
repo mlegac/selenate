@@ -5,4 +5,12 @@ import org.openqa.selenium.By
 
 
 
-case class Locator(name: String, componentList: By*)
+object Locator {
+  def apply(name: String, componentList: By*) =
+    new Locator(name, componentList.toSet)
+}
+
+
+class Locator(val name: String, val componentSet: Set[By]) {
+  override def toString = "Locator(%s)" format name
+}

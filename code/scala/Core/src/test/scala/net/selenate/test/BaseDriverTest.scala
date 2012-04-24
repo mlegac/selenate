@@ -8,7 +8,7 @@ import org.scalatest._
 import matchers._
 
 object BaseDriverTest extends MustMatchers {
-  val TestSettings = BaseDriverSettings(5000, 250)
+  val TestSettings = BaseDriverSettings(5000, 100, 0.5)
 
   case class TimedResult[T](r: T, t: Long)
   def exec[T](f: => T): Either[Exception, TimedResult[T]] =
@@ -42,17 +42,19 @@ class BaseDriverTest extends FeatureSpec
     with EitherValues {
   import BaseDriverTest._
 
-  feature("Element existence verification") {
+  feature("Locator existence verification") {
     info("Initializig locators...")
-    val existingLocator = Locator("d1", By.id("d1"))
-    val missingLocator1 = Locator("missing1", By.id("missing1"))
-    val missingLocator2 = Locator("missing2", By.id("missing2"))
+    val locator100 = Locator("d1_100", By.linkText("D1T"), By.id("d1i"), By.className("d1c"), By.xpath("//html[1]/body[1]/a[1]"))
+    val locator075 = Locator("d1_075", By.linkText("missing"), By.id("d1i"), By.className("d1c"), By.xpath("//html[1]/body[1]/a[1]"))
+    val locator050 = Locator("d1_050", By.linkText("missing"), By.id("missing"), By.className("d1c"), By.xpath("//html[1]/body[1]/a[1]"))
+    val locator025 = Locator("d1_025", By.linkText("missing"), By.id("missing"), By.className("missing"), By.xpath("//html[1]/body[1]/a[1]"))
+    val locator000 = Locator("d1_000", By.linkText("missing"), By.id("missing"), By.className("missing"), By.xpath("//html[1]/body[1]/missing"))
 
-    scenario("verifying that an element does exist") {
+    scenario("verifying that a locator does exist") {
       val d = init("existence.html")
 
-      given("an element that does exist")
-      val locator = existingLocator
+      given("a locator with missing element ratio above treshold")
+      val locator = locator100
       when("its existence is verified")
       val result = exec(d.locatorExists(locator))
       then("it must be found")
@@ -61,11 +63,11 @@ class BaseDriverTest extends FeatureSpec
       d.close
     }
 
-    scenario("verifying that en element does not exist") {
+    scenario("verifying that a locator does not exist") {
       val d = init("existence.html")
 
-      given("an element that does not exist")
-      val locator = missingLocator1
+      given("a locator with missing element ratio below treshold")
+      val locator = locator000
       when("its existence is verified")
       val result = exec(d.locatorExists(locator))
       then("it must not be found")
@@ -74,11 +76,11 @@ class BaseDriverTest extends FeatureSpec
       d.close
     }
 
-    scenario("verifying that any element from a list exists") {
+    scenario("verifying that any locator from a list exists") {
       val d = init("existence.html")
 
-      given("a list of two elements where one does exist and the other does not")
-      val locatorList = List(existingLocator, missingLocator1)
+      given("a list of two locators where one does exist and the other does not")
+      val locatorList = List(locator100, locator000)
       when("their existence is verified")
       val result = exec(d.locatorListExists(locatorList))
       then("they must be found")
@@ -87,11 +89,11 @@ class BaseDriverTest extends FeatureSpec
       d.close
     }
 
-    scenario("verifying that no element from a list exists") {
+    scenario("verifying that no locator from a list exists") {
       val d = init("existence.html")
 
-      given("a list of two elements where neither exists")
-      val locatorList = List(missingLocator1, missingLocator2)
+      given("a list of two locators where neither exists")
+      val locatorList = List(locator025, locator000)
       when("their existence is verified")
       val result = exec(d.locatorListExists(locatorList))
       then("they must not be found")
@@ -103,16 +105,16 @@ class BaseDriverTest extends FeatureSpec
 
 
 
-  feature("Waiting for an element to appear") {
+  feature("Waiting for a locator to appear") {
     info("Initializig locators...")
     val existingLocator = Locator("d1", By.id("d1"))
     val missingLocator1  = Locator("missing1", By.id("missing1"))
     val missingLocator2  = Locator("missing2", By.id("missing2"))
 
-    scenario("waiting for an element which will appear") {
+    scenario("waiting for a locator which will appear") {
       val d = init("waiting.html")
 
-      given("an element which will appear")
+      given("a locator which will appear")
       val locator = existingLocator
       and("a delay")
       val delay = 500
