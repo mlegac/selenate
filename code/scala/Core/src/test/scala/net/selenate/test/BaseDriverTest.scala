@@ -8,7 +8,7 @@ import org.scalatest._
 import matchers._
 
 object SelenateDriverTest extends MustMatchers {
-  val TestSettings = SelenateDriverSettings(5000, 100, 0.5)
+  val TestSettings = SelenateSettings(5000, 100, 0.5)
 
   case class TimedResult[T](r: T, t: Long)
   def exec[T](f: => T): Either[Exception, TimedResult[T]] =

@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement
   * @param timeout used when waiting for web page elements to load (maximum waiting time)
   * @param resolution used when waiting for web page elements to load (pause between successive checks)
   */
-case class SelenateDriverSettings(
+case class SelenateSettings(
     timeout: Long,
     resolution: Long,
     locatorMissingTreshold: Double)
@@ -22,25 +22,21 @@ case class SelenateDriverSettings(
 /** Provides defaults, and utility methods for `SelenateDriver`. */
 object SelenateDriver {
   /** Default settings for `SelenateDriver` (timeout of 30 s and resolution of 250 ms. */
-  val DefaultSettings = SelenateDriverSettings(30000L, 250L, 0.5)
-
-  private def InitFP(fpOpt: Option[FirefoxProfile]): FirefoxProfile =
-    fpOpt.getOrElse(new FirefoxProfile())
+  val DefaultSettings = SelenateSettings(30000L, 250L, 0.5)
 }
 
 
 
 /** Main ''Selenate'' class, based on `FirefoxDriver`. */
-class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDriverSettings)
-    extends FirefoxDriver(SelenateDriver.InitFP(fpOpt))
+class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSettings)
+    extends BaseDriver(fpOpt, settings)
     with Capturable {
-  import SelenateDriver._
 
-  def this(settings: SelenateDriverSettings = SelenateDriver.DefaultSettings) =
+  def this(settings: SelenateSettings = SelenateDriver.DefaultSettings) =
     this(None, settings)
   def this(
       fp: FirefoxProfile,
-      settings: SelenateDriverSettings = SelenateDriver.DefaultSettings) =
+      settings: SelenateSettings = SelenateDriver.DefaultSettings) =
     this(Some(fp), settings)
 
 
@@ -51,7 +47,7 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDr
     */
   def waitForLocator(locator: Locator) {
     waitOrFail(locator.name) {
-      locatorExists(locator)
+      locatorExistsBase(locator)
     }
   }
 
@@ -63,7 +59,7 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDr
   def waitForLocatorList(locatorList: Seq[Locator]) {
     val politeName = locatorList.map(_.name) mkString " or "
     waitOrFail(politeName) {
-      locatorListExists(locatorList)
+      locatorListExistsBase(locatorList)
     }
   }
 
@@ -71,21 +67,20 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDr
   /** Checks weather the specified locator currently exists.
     *
     * @param locator locator to search for
+    * @return true if the locator exists; false otherwise
     */
-  def locatorExists(locator: Locator): Boolean = {
-    val foundElementList = locator.componentSet filter elementExists
-    val missingElementList = locator.componentSet &~ foundElementList
-
-    val missingRatio = missingElementList.size.toDouble / locator.componentSet.size.toDouble
-    missingRatio < settings.locatorMissingTreshold
+  def locatorExists(locator: Locator) = {
+    locatorExistsBase(locator)
   }
 
   /** Checks weather any locator from the specified list currently exists.
     *
     * @param locatorList a sequence of locators to search for
+    * @return true if any of the locators exist; false otherwise
     */
-  def locatorListExists(locatorList: Seq[Locator]): Boolean =
-    locatorList map locatorExists _ contains true
+  def locatorListExists(locatorList: Seq[Locator]) = {
+    locatorListExistsBase(locatorList)
+  }
 
 
 
@@ -102,21 +97,4 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDr
         capture("EXCEPTION: " + e.getClass.getName)
         throw e
     }
-
-
-
-  protected def elementExists(by: By): Boolean =
-    tryFindElement(by).isDefined
-
-  protected def tryFindElement(by: By): Option[WebElement] =
-    try {
-      Some(findElement(by))
-    } catch {
-      case e: Exception => None
-    }
-
-  protected def waitFor(predicate: => Boolean) =
-    util.waitFor(settings.timeout, settings.resolution)
-  protected def waitOrFail =
-    util.waitOrFail(settings.timeout, settings.resolution)
 }
