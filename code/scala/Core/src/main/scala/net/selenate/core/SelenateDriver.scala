@@ -8,21 +8,21 @@ import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 
 
-/** Storage class for `BaseDriver` settings.
+/** Storage class for `SelenateDriver` settings.
   *
   * @param timeout used when waiting for web page elements to load (maximum waiting time)
   * @param resolution used when waiting for web page elements to load (pause between successive checks)
   */
-case class BaseDriverSettings(
+case class SelenateDriverSettings(
     timeout: Long,
     resolution: Long,
     locatorMissingTreshold: Double)
 
 
-/** Provides defaults, and utility methods for `BaseDriver`. */
-object BaseDriver {
-  /** Default settings for `BaseDriver` (timeout of 30 s and resolution of 250 ms. */
-  val DefaultSettings = BaseDriverSettings(30000L, 250L, 0.5)
+/** Provides defaults, and utility methods for `SelenateDriver`. */
+object SelenateDriver {
+  /** Default settings for `SelenateDriver` (timeout of 30 s and resolution of 250 ms. */
+  val DefaultSettings = SelenateDriverSettings(30000L, 250L, 0.5)
 
   private def InitFP(fpOpt: Option[FirefoxProfile]): FirefoxProfile =
     fpOpt.getOrElse(new FirefoxProfile())
@@ -31,16 +31,16 @@ object BaseDriver {
 
 
 /** Main ''Selenate'' class, based on `FirefoxDriver`. */
-class BaseDriver private(fpOpt: Option[FirefoxProfile], settings: BaseDriverSettings)
-    extends FirefoxDriver(BaseDriver.InitFP(fpOpt))
+class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateDriverSettings)
+    extends FirefoxDriver(SelenateDriver.InitFP(fpOpt))
     with Capturable {
-  import BaseDriver._
+  import SelenateDriver._
 
-  def this(settings: BaseDriverSettings = BaseDriver.DefaultSettings) =
+  def this(settings: SelenateDriverSettings = SelenateDriver.DefaultSettings) =
     this(None, settings)
   def this(
       fp: FirefoxProfile,
-      settings: BaseDriverSettings = BaseDriver.DefaultSettings) =
+      settings: SelenateDriverSettings = SelenateDriver.DefaultSettings) =
     this(Some(fp), settings)
 
 
