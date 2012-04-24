@@ -11,7 +11,9 @@ object Core extends Build {
     Seq(
       selenium,
       jodaTime,
-      scalaTest
+      scalaTest,
+      slf4j,
+      logback % "test"
     )
   ) settings(
     initialCommands := """

@@ -12,5 +12,5 @@ object Locator {
 
 
 class Locator(val name: String, val componentSet: Set[By]) {
-  override def toString = "Locator(%s)" format name
+  override def toString = name formatted "#%s"
 }

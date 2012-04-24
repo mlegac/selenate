@@ -1,6 +1,7 @@
 package net.selenate
 
 import scala.annotation.tailrec
+import org.slf4j.LoggerFactory
 
 
 /** Provides general utility functions for the entire project. */

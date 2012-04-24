@@ -6,6 +6,7 @@ import scala.collection.JavaConversions._
 import org.openqa.selenium.OutputType
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
+import org.slf4j.LoggerFactory
 
 
 /** Storage class for `SelenateDriver` settings.
@@ -39,29 +40,7 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
       settings: SelenateSettings = SelenateDriver.DefaultSettings) =
     this(Some(fp), settings)
 
-
-  /** Waits for the specified locator to appear.
-    *
-    * @param locator locator to wait for
-    * @throws SelenateException if the locator is never found
-    */
-  def waitForLocator(locator: Locator) {
-    waitOrFail(locator.name) {
-      locatorExistsBase(locator)
-    }
-  }
-
-  /** Waits for any locator from the specified list.
-    *
-    * @param locatorList a sequence of locators to wait for
-    * @throws SelenateException if none of the locators are ever found
-    */
-  def waitForLocatorList(locatorList: Seq[Locator]) {
-    val politeName = locatorList.map(_.name) mkString " or "
-    waitOrFail(politeName) {
-      locatorListExistsBase(locatorList)
-    }
-  }
+  private val logger = LoggerFactory.getLogger(classOf[SelenateDriver])
 
 
   /** Checks weather the specified locator currently exists.
@@ -70,7 +49,10 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
     * @return true if the locator exists; false otherwise
     */
   def locatorExists(locator: Locator) = {
-    locatorExistsBase(locator)
+    logger.info("Checking existence of locator [%s]..." format locator.toString)
+    val result = locatorExistsBase(locator)
+    logger.info("Locator [%s] found: %s!".format(locator.toString, result.toString))
+    result
   }
 
   /** Checks weather any locator from the specified list currently exists.
@@ -79,9 +61,40 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
     * @return true if any of the locators exist; false otherwise
     */
   def locatorListExists(locatorList: Seq[Locator]) = {
-    locatorListExistsBase(locatorList)
+    val ps = polite(locatorList)
+    logger.info("Checking existence of locators: %s..." format ps)
+    val result = locatorListExistsBase(locatorList)
+    logger.info("Locators %s found: %s!".format(ps, result.toString))
+    result
   }
 
+
+  /** Waits for the specified locator to appear.
+    *
+    * @param locator locator to wait for
+    * @throws SelenateException if the locator is never found
+    */
+  def waitForLocator(locator: Locator) {
+    logger.info("Waiting for locator: [%s]..." format locator.toString)
+    waitOrFail(locator.name) {
+      locatorExistsBase(locator)
+    }
+    logger.info("Locator [%s] found: true!" format locator.toString)
+  }
+
+  /** Waits for any locator from the specified list.
+    *
+    * @param locatorList a sequence of locators to wait for
+    * @throws SelenateException if none of the locators are ever found
+    */
+  def waitForLocatorList(locatorList: Seq[Locator]) {
+    val ps = polite(locatorList)
+    logger.info("Waiting for locators %s..." format ps)
+    waitOrFail(ps) {
+      locatorListExistsBase(locatorList)
+    }
+    logger.info("Locators %s found: true!" format ps)
+  }
 
 
   /** Catches and logs any exceptions that occur in the specified function.

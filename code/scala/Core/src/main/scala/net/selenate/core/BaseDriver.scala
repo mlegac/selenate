@@ -6,6 +6,8 @@ import scala.collection.JavaConversions._
 import org.openqa.selenium.OutputType
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
+import org.slf4j.LoggerFactory
+
 
 /** Provides utility methods for `BaseDriver`. */
 object BaseDriver {
@@ -21,32 +23,56 @@ object BaseDriver {
 class BaseDriver protected(fpOpt: Option[FirefoxProfile], settings: SelenateSettings)
     extends FirefoxDriver(BaseDriver.InitFP(fpOpt)) {
 
+  private val logger = LoggerFactory.getLogger(classOf[BaseDriver])
+
   def locatorExistsBase(locator: Locator): Boolean = {
+    logger.debug("Waiting for locator: [%s]..." format locator.toString)
     val foundElementList = locator.componentSet filter elementExists
     val missingElementList = locator.componentSet &~ foundElementList
 
+    logger.trace("Found elements: %s." format polite(foundElementList))
+    logger.trace("Missing elements: %s." format polite(missingElementList))
+    if (!missingElementList.isEmpty && !foundElementList.isEmpty)
+      logger.warn("Locator [%s] has broken element references (%s)".format(locator.toString, polite(missingElementList)))
+
     val missingRatio = missingElementList.size.toDouble / locator.componentSet.size.toDouble
-    missingRatio < settings.locatorMissingTreshold
+    logger.trace("Missing ratio: %6.2f%%." format missingRatio*100.0)
+
+    val result = missingRatio < settings.locatorMissingTreshold
+    logger.info("Locator [%s] found: %s!".format(locator.toString, result.toString))
+    result
   }
 
-  def locatorListExistsBase(locatorList: Seq[Locator]): Boolean =
-    locatorList map locatorExistsBase _ contains true
-
+  def locatorListExistsBase(locatorList: Seq[Locator]): Boolean = {
+    val ps = polite(locatorList)
+    logger.info("Checking existence of locators: %s..." format ps)
+    val result = locatorList map locatorExistsBase _ contains true
+    logger.info("Locators %s found: %s!".format(ps, result.toString))
+    result
+  }
 
 
   protected def elementExists(by: By): Boolean =
     tryFindElement(by).isDefined
 
-  protected def tryFindElement(by: By): Option[WebElement] =
-    try {
+  protected def tryFindElement(by: By): Option[WebElement] = {
+    logger.debug("Trying to find element [%s]..." format by.toString)
+    val result = try {
       Some(findElement(by))
     } catch {
       case e: Exception => None
     }
+    logger.info("Element [%s] found: %s!".format(by.toString, result.toString))
+    result
+  }
 
 
   protected def waitFor =
     util.waitFor(settings.timeout, settings.resolution)
   protected def waitOrFail =
     util.waitOrFail(settings.timeout, settings.resolution)
+
+
+  protected def polite[T](i: Iterable[T]) =
+    i.mkString("[", "], [", "]")
 }
