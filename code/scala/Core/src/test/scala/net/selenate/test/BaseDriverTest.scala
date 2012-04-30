@@ -81,26 +81,26 @@ class SelenateDriverTest extends FeatureSpec
       d.close
     }
 
-    scenario("verifying that any locator from a list exists") {
+    scenario("verifying that any locator from a set exists") {
       val d = init("existence.html")
 
-      given("a list of two locators where one does exist and the other does not")
-      val locatorList = List(locator100, locator000)
+      given("a set of two locators where one does exist and the other does not")
+      val locatorSet = Set(locator100, locator000)
       when("their existence is verified")
-      val result = exec(d.locatorListExists(locatorList))
+      val result = exec(d.locatorSetExists(locatorSet))
       then("they must be found")
       result.right.value.r must equal (true)
 
       d.close
     }
 
-    scenario("verifying that no locator from a list exists") {
+    scenario("verifying that no locator from a set exists") {
       val d = init("existence.html")
 
-      given("a list of two locators where neither exists")
-      val locatorList = List(locator025, locator000)
+      given("a set of two locators where neither exists")
+      val locatorSet = Set(locator025, locator000)
       when("their existence is verified")
-      val result = exec(d.locatorListExists(locatorList))
+      val result = exec(d.locatorSetExists(locatorSet))
       then("they must not be found")
       result.right.value.r must equal (false)
 
