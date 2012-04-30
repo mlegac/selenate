@@ -43,10 +43,10 @@ class BaseDriver protected(fpOpt: Option[FirefoxProfile], settings: SelenateSett
     result
   }
 
-  def locatorListExistsBase(locatorList: Seq[Locator]): Boolean = {
-    val ps = polite(locatorList)
+  def locatorSetExistsBase(locatorSet: Set[Locator]): Boolean = {
+    val ps = polite(locatorSet)
     logger.info("Checking existence of locators: %s..." format ps)
-    val result = locatorList map locatorExistsBase _ contains true
+    val result = locatorSet map locatorExistsBase _ contains true
     logger.info("Locators %s found: %s!".format(ps, result.toString))
     result
   }

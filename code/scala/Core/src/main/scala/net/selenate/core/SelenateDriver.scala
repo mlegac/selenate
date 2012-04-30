@@ -55,15 +55,15 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
     result
   }
 
-  /** Checks weather any locator from the specified list currently exists.
+  /** Checks weather any locator from the specified set currently exists.
     *
-    * @param locatorList a sequence of locators to search for
+    * @param locatorSet a set of locators to search for
     * @return true if any of the locators exist; false otherwise
     */
-  def locatorListExists(locatorList: Seq[Locator]) = {
-    val ps = polite(locatorList)
+  def locatorSetExists(locatorSet: Set[Locator]) = {
+    val ps = polite(locatorSet)
     logger.info("Checking existence of locators: %s..." format ps)
-    val result = locatorListExistsBase(locatorList)
+    val result = locatorSetExistsBase(locatorSet)
     logger.info("Locators %s found: %s!".format(ps, result.toString))
     result
   }
@@ -82,16 +82,16 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
     logger.info("Locator [%s] found: true!" format locator.toString)
   }
 
-  /** Waits for any locator from the specified list.
+  /** Waits for any locator from the specified set.
     *
-    * @param locatorList a sequence of locators to wait for
+    * @param locatorSet a set of locators to wait for
     * @throws SelenateException if none of the locators are ever found
     */
-  def waitForLocatorList(locatorList: Seq[Locator]) {
-    val ps = polite(locatorList)
+  def waitForLocatorSet(locatorSet: Set[Locator]) {
+    val ps = polite(locatorSet)
     logger.info("Waiting for locators %s..." format ps)
     waitOrFail(ps) {
-      locatorListExistsBase(locatorList)
+      locatorSetExistsBase(locatorSet)
     }
     logger.info("Locators %s found: true!" format ps)
   }
