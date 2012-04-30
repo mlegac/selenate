@@ -43,6 +43,7 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
   private val logger = LoggerFactory.getLogger(classOf[SelenateDriver])
 
 
+
   /** Checks weather the specified locator currently exists.
     *
     * @param locator locator to search for
@@ -63,10 +64,11 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
   def locatorSetExists(locatorSet: Set[Locator]) = {
     val ps = polite(locatorSet)
     logger.info("Checking existence of locators: %s..." format ps)
-    val result = locatorSetExistsBase(locatorSet)
+    val result = locatorSetExistsAnyBase(locatorSet)
     logger.info("Locators %s found: %s!".format(ps, result.toString))
     result
   }
+
 
 
   /** Waits for the specified locator to appear.
@@ -91,10 +93,26 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
     val ps = polite(locatorSet)
     logger.info("Waiting for locators %s..." format ps)
     waitOrFail(ps) {
-      locatorSetExistsBase(locatorSet)
+      locatorSetExistsAllBase(locatorSet)
     }
     logger.info("Locators %s found: true!" format ps)
   }
+
+
+
+  /** Waits for all locators from the specified page to appear.
+    *
+    * @param page page whose locators to wait for
+    * @throws SelenateException if all of the locators are not found
+    */
+  def waitForPage(page: Page) {
+    logger.info("Waiting for page %s..." format page.toString)
+    waitOrFail(page.name) {
+      locatorSetExistsAllBase(page.locatorSet)
+    }
+    logger.info("Page [%s] found: true!" format page.toString)
+  }
+
 
 
   /** Catches and logs any exceptions that occur in the specified function.
