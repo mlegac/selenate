@@ -22,10 +22,12 @@ trait Capturable {
       dt: DateTime,
       html: String,
       screen: Array[Byte],
-      cookieList: Set[Cookie]) {
+      cookieSet: Set[Cookie]) {
     override def toString =
       "CaptureData(Time = %s; html len = %s)".
       format(dt.toString(dtFormat), html.length)
+
+    lazy val cookieStr = cookieSet mkString "\n"
   }
 
 
