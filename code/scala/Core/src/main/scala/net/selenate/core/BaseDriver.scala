@@ -46,9 +46,9 @@ class BaseDriver protected(fpOpt: Option[FirefoxProfile], settings: SelenateSett
   def locatorSetExistsBase(locatorSet: Set[Locator])(op: (Boolean, Boolean) => Boolean): Boolean = {
     val ps = polite(locatorSet)
     logger.info("Checking existence of locators: %s..." format ps)
-    val result = locatorSet map locatorExistsBase _ reduceOption op
+    val result = locatorSet map locatorExistsBase _ reduceOption op getOrElse(true)
     logger.info("Locators %s found: %s!".format(ps, result.toString))
-    result getOrElse(true)
+    result
   }
 
   def locatorSetExistsAllBase =
@@ -67,7 +67,7 @@ class BaseDriver protected(fpOpt: Option[FirefoxProfile], settings: SelenateSett
     } catch {
       case e: Exception => None
     }
-    logger.info("Element [%s] found: %s!".format(by.toString, result.toString))
+    logger.info("Element [%s] found: %s!".format(by.toString, Opt2TF(result)))
     result
   }
 
@@ -77,6 +77,9 @@ class BaseDriver protected(fpOpt: Option[FirefoxProfile], settings: SelenateSett
   protected def waitOrFail =
     util.waitOrFail(settings.timeout, settings.resolution)
 
+
+  protected def Opt2TF[T](opt: Option[T]) =
+    opt.map(e => "true").getOrElse("false")
 
   protected def polite[T](i: Iterable[T]) =
     i.mkString("[", "], [", "]")
