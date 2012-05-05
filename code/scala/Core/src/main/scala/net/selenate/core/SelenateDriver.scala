@@ -114,6 +114,24 @@ class SelenateDriver private(fpOpt: Option[FirefoxProfile], settings: SelenateSe
   }
 
 
+  /** Waits for any page to appear from the specified list.
+    *
+    * @param pageList list of pages to wait for
+    * @throws SelenateException if none of the pages are found
+    */
+  def waitForPageList(pageList: Page*) = {
+    val ps = polite(pageList)
+    logger.info("Waiting for pages %s..." format ps)
+    waitOrFail(ps) {
+      pageList
+        .map(page => locatorSetExistsAllBase(page.locatorSet))
+        .fold(false)(_ || _)
+    }
+
+    pageList.find(page => locatorSetExistsAllBase(page.locatorSet)).get.name
+  }
+
+
 
   /** Catches and logs any exceptions that occur in the specified function.
     * All exceptions that occur in the `failsafe` block are caught and captured.
